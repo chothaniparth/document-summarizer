@@ -5,3 +5,7 @@
 /queues/__pycache__
 /queues/.env
 /clients/__pycache__
+/test_mongo_connection.py
+*.pyc
+*.pyo
+*.pdf
