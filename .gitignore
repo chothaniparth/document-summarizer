@@ -2,3 +2,6 @@
 /PDF-Guide-Node-Andrew-Mead-v3.pdf
 /__pycache__
 /venv
+/queues/__pycache__
+/queues/.env
+/clients/__pycache__
