@@ -6,6 +6,7 @@
 /queues/.env
 /clients/__pycache__
 /test_mongo_connection.py
+/test_qdrant_schema.py
 *.pyc
 *.pyo
 *.pdf
