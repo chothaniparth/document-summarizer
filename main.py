@@ -19,6 +19,7 @@ from queues.worker import process_query
 from passlib.context import CryptContext
 import jwt
 from datetime import datetime
+import datetime
 
 load_dotenv()
 
@@ -34,11 +35,15 @@ pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
 app = FastAPI()
 
 ROOT_PATH = Path.cwd()
+MEDIA_PATH = ROOT_PATH / "media"
+
+# Create media directory if it doesn't exist
+MEDIA_PATH.mkdir(exist_ok=True)
 
 openai_client = OpenAI()
 
 # correct way
-app.mount("/files", StaticFiles(directory=ROOT_PATH), name="files")
+app.mount("/files", StaticFiles(directory=MEDIA_PATH), name="files")
 
 embedding_model = OpenAIEmbeddings(
     model="text-embedding-3-large"
@@ -102,7 +107,7 @@ async def save_file(
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     unique_name = f"{timestamp}_{file.filename}"
 
-    file_path = ROOT_PATH / unique_name
+    file_path = MEDIA_PATH / unique_name
     with open(file_path, "wb") as f:
         f.write(await file.read())
 
@@ -110,8 +115,8 @@ async def save_file(
     doc_data = {
         "userId": UserId,
         "fileName": unique_name,
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow()
+        # "created_at": datetime.utcnow(),
+        # "updated_at": datetime.utcnow()
     }
 
     result = await db.documents.insert_one(doc_data)
