@@ -1,4 +1,21 @@
+version: "3.9"
+
 services:
+  # Your project
+  # app:
+  #   build: .
+  #   volumes:
+  #     - .:/app
+  #   ports:
+  #     - "8501:8501" # Streamlit
+  #     - "8000:8000" # API
+  #   depends_on:
+  #     - mongo
+  #     - valkey
+  #     - vector-db
+  #   command: bash start_app.sh
+
+  # Vector DB
   vector-db:
     image: qdrant/qdrant
     ports:
@@ -6,11 +23,13 @@ services:
     volumes:
       - qdrant_storage:/qdrant/storage
 
+  # Redis (Valkey)
   valkey:
     image: valkey/valkey
     ports:
       - "6379:6379"
 
+  # MongoDB
   mongo:
     image: mongo
     environment:

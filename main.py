@@ -16,7 +16,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import uvicorn
 from clients.rq_client import queue
 from queues.worker import process_query
-from passlib.context import CryptContext
+import bcrypt
 import jwt
 from datetime import datetime
 import datetime
@@ -30,7 +30,7 @@ JWT_SECRET = os.getenv('JWT_SECRET')
 client = AsyncIOMotorClient(MONGO_URI)
 db = client[MONGO_DB_NAME]
 
-pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 app = FastAPI()
 
@@ -90,8 +90,8 @@ def init_qdrant_collection():
 # Initialize on startup
 init_qdrant_collection()
 
-def main():
-    uvicorn.run(app, port=8000, host="0.0.0.0")
+# def main():
+#     uvicorn.run(app, port=8000, host="0.0.0.0")
 
 @app.get('/')
 def startServer():
@@ -104,7 +104,7 @@ async def save_file(
     UserId: str = Form(...)
 ):
     # save file
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     unique_name = f"{timestamp}_{file.filename}"
 
     file_path = MEDIA_PATH / unique_name
@@ -184,7 +184,9 @@ async def signup(body: UserSignup):
     if user:
         return {"error": "Email already exists"}
 
-    hashed = pwd.hash(body.password)
+    # Hash password using bcrypt
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(body.password.encode('utf-8'), salt).decode('utf-8')
 
     res = await db.users.insert_one({
         "name": body.name,
@@ -200,7 +202,7 @@ async def login(body: UserLogin):
     if not user:
         return {"error": "Invalid credentials"}
 
-    if not pwd.verify(body.password, user["password"]):
+    if not bcrypt.checkpw(body.password.encode('utf-8'), user["password"].encode('utf-8')):
         return {"error": "Invalid credentials"}
 
     token = jwt.encode({
@@ -210,4 +212,4 @@ async def login(body: UserLogin):
 
     return {"token": token, "user_id": str(user["_id"]), "email" : str(user["email"]), "name" : str(user["name"])}
 
-main()
+# main()
