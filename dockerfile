@@ -1,18 +1,19 @@
-# Base image
 FROM python:3.11-slim
 
-# Set workdir
 WORKDIR /app
 
-# Copy project files
-COPY . /app
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip and install requirements
-RUN pip install --upgrade pip
+COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# Expose ports
-EXPOSE 8501 8000
+COPY . .
 
-# Default command (can be overridden in docker-compose)
-CMD ["bash", "start_app.sh"]
+EXPOSE 8501
+
+CMD ["streamlit", "run", "streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
